@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:accenture_hackaton_2025/config/app_theme.dart';
 import 'package:accenture_hackaton_2025/di/injection.dart';
 import 'package:accenture_hackaton_2025/presentation/features/chat/cubit/chat_cubit.dart';
@@ -6,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NewSymptomPage extends StatefulWidget {
+  const NewSymptomPage({super.key});
+
   @override
   _NewSymptomPageState createState() => _NewSymptomPageState();
 }
@@ -76,7 +80,7 @@ class _PageBodyState extends State<_PageBody> {
   Widget build(BuildContext context) {
     return BlocConsumer<ChatCubit, ChatState>(
         listener: (context, state) => {
-              if (state.lastMessage != null)
+              if (state.userInput.isEmpty)
                 {
                   _textController.clear(),
                 }
@@ -130,6 +134,8 @@ class _PageBodyState extends State<_PageBody> {
                           minLines: state.messages.length > 1 ? 2 : 10,
                           maxLines: 10,
                           decoration: const InputDecoration(
+                            filled: true,
+                            fillColor: Colors.white,
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.all(
                                 Radius.circular(12),
@@ -139,6 +145,15 @@ class _PageBodyState extends State<_PageBody> {
                                 'Enter your symptom details here or tap the mic button to record a voice message',
                           ),
                         ),
+                        if (state.images.isNotEmpty) ...[
+                          const SizedBox(height: 12),
+                          const SizedBox(
+                            height: 100,
+                            child: Align(
+                                alignment: Alignment.centerLeft,
+                                child: _ImagesPreviewRow()),
+                          ),
+                        ],
                         const SizedBox(height: 12),
                         Row(
                           children: [
@@ -146,7 +161,15 @@ class _PageBodyState extends State<_PageBody> {
                               icon: const Icon(Icons.attach_file),
                               style: widget._buttonStyle,
                               onPressed: () {
-                                // Handle attachment action
+                                context.read<ChatCubit>().addFile();
+                              },
+                            ),
+                            const SizedBox(width: 12),
+                            IconButton(
+                              icon: const Icon(Icons.camera_alt),
+                              style: widget._buttonStyle,
+                              onPressed: () {
+                                context.read<ChatCubit>().uploadPhoto();
                               },
                             ),
                             const SizedBox(width: 12),
@@ -239,28 +262,105 @@ class _PageBodyState extends State<_PageBody> {
   }) {
     return ListTile(
       title: Align(
-        alignment: (message.isUser ?? false)
-            ? Alignment.centerRight
-            : Alignment.centerLeft,
+        alignment:
+            (message.isUser) ? Alignment.centerRight : Alignment.centerLeft,
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            color: (message.isUser ?? false)
+            color: (message.isUser)
                 ? AppTheme.primaryColorLight
                 : AppTheme.textHintColor,
           ),
           child: Padding(
             padding: const EdgeInsets.all(8),
-            child: Text(
-              message.message,
-              style: TextStyle(
-                  color: (message.isUser ?? false)
-                      ? AppTheme.textColorLight
-                      : AppTheme.textColorDark),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  message.message,
+                  style: TextStyle(
+                      color: (message.isUser)
+                          ? AppTheme.textColorLight
+                          : AppTheme.textColorDark),
+                ),
+                if (message.images.isNotEmpty)
+                  SizedBox(
+                    height: 100,
+                    child: ListView.separated(
+                      separatorBuilder: (context, index) => const SizedBox(
+                        width: 8,
+                      ),
+                      shrinkWrap: true,
+                      scrollDirection: Axis.horizontal,
+                      itemCount: message.images.length,
+                      itemBuilder: (context, index) {
+                        final image = message.images[index];
+                        return Image.file(
+                          image,
+                          width: 100,
+                          height: 100,
+                          fit: BoxFit.cover,
+                        );
+                      },
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ImagesPreviewRow extends StatelessWidget {
+  const _ImagesPreviewRow({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ChatCubit, ChatState>(
+      builder: (context, state) {
+        return ListView.separated(
+          shrinkWrap: true,
+          scrollDirection: Axis.horizontal,
+          itemCount: state.images.length,
+          separatorBuilder: (context, index) => const SizedBox(width: 8),
+          itemBuilder: (context, index) {
+            final image = state.images[index];
+            return _ImagePreview(image: image, index: index);
+          },
+        );
+      },
+    );
+  }
+}
+
+class _ImagePreview extends StatelessWidget {
+  const _ImagePreview({super.key, required this.image, required this.index});
+  final File image;
+  final int index;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        Image.file(
+          image,
+          width: 100,
+          height: 100,
+          fit: BoxFit.cover,
+        ),
+        Positioned(
+          top: 0,
+          right: 0,
+          child: IconButton(
+            icon: const Icon(Icons.close),
+            onPressed: () {
+              context.read<ChatCubit>().removeImage(index);
+            },
+          ),
+        ),
+      ],
     );
   }
 }
