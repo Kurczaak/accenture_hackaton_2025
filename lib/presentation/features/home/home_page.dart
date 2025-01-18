@@ -1,8 +1,7 @@
 import 'package:accenture_hackaton_2025/presentation/common/text.dart';
+import 'package:accenture_hackaton_2025/presentation/features/chat/chat_page.dart';
 import 'package:accenture_hackaton_2025/presentation/features/onboarding/onbarding_page.dart';
 import 'package:accenture_hackaton_2025/presentation/features/symptom/new_symptom_page.dart';
-import 'package:accenture_hackaton_2025/router/router.gr.dart';
-import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
@@ -41,6 +40,15 @@ class HomePage extends StatelessWidget {
                   );
                 },
                 child: const MyText(text: 'New Symptom'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ChatPage()),
+                  );
+                },
+                child: const MyText(text: 'Chat page'),
               ),
             ],
           ),
