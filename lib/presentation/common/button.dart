@@ -36,7 +36,7 @@ class _MyButtonState extends State<MyButton> {
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               colors: [
                 AppTheme.primaryColor,
                 AppTheme.primaryColorLight,
@@ -55,7 +55,7 @@ class _MyButtonState extends State<MyButton> {
             alignment: Alignment.center,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textColorLight,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
