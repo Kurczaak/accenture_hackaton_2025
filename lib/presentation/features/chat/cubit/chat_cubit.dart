@@ -260,9 +260,6 @@ class ChatCubit extends Cubit<ChatState> {
     final List<String> symptoms =
         List<String>.from(arguments['symptoms'] ?? []);
 
-    // Do something with the collected symptoms, like storing or processing them
-    print('XXX Symptoms collected: $symptoms');
-
     emit(
       state.copyWith(
         symptoms: [...state.symptoms, ...symptoms],
@@ -279,7 +276,6 @@ class ChatCubit extends Cubit<ChatState> {
       emit(state.copyWith(isSTT: true));
       await SpeechToText().listen(
         onResult: (result) {
-          print('XDDDD ${result.recognizedWords}');
           emit(state.copyWith(sttText: result.recognizedWords, isSTT: true));
         },
       );
@@ -383,14 +379,6 @@ class ChatCubit extends Cubit<ChatState> {
     final List<Appointment> appointments = rawAppointments
         .map((apt) => Appointment.fromJson(apt as Map<String, dynamic>))
         .toList();
-
-    // 9. Do something with the suggested appointments (store, display, etc.)
-    // For now, we'll simply print them and emit them in state.
-    for (var appointment in appointments) {
-      print(
-          'Suggested: ${appointment.appointmentName} with Dr. ${appointment.doctor} '
-          'at ${appointment.office} on ${appointment.date}');
-    }
 
     // If you want to store these in your state:
     emit(

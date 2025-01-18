@@ -87,7 +87,6 @@ class _PageBodyState extends State<_PageBody> {
       }
       return true;
     }, listener: (context, state) {
-      print('XDXDXD $state');
       if (state.sttText != null) {
         _textController.text = state.sttText!;
       }
