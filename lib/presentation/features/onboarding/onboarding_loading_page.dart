@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
 class OnboardingLoadingPage extends StatelessWidget {
+  const OnboardingLoadingPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -16,7 +18,7 @@ class OnboardingLoadingPage extends StatelessWidget {
             ColorFiltered(
               colorFilter: const ColorFilter.mode(
                 AppTheme.primaryColor,
-                BlendMode.,
+                BlendMode.modulate,
               ),
               child: Lottie.asset(
                 'assets/lottie/onboarding.json',
