@@ -25,7 +25,7 @@ extension GetItInjectableX on _i174.GetIt {
       environment,
       environmentFilter,
     );
-    gh.factory<_i845.ChatCubit>(() => _i845.ChatCubit());
+    gh.singleton<_i845.ChatCubit>(() => _i845.ChatCubit());
     return this;
   }
 }

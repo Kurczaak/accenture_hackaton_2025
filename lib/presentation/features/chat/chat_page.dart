@@ -64,7 +64,9 @@ class _PageBody extends StatelessWidget {
                     width: 100,
                     child: ElevatedButton(
                       onPressed: () {
-                        context.read<ChatCubit>().sendMessage();
+                        context
+                            .read<ChatCubit>()
+                            .sendMessage(isOnboarding: false);
                       },
                       child: const Text('Send'),
                     ),

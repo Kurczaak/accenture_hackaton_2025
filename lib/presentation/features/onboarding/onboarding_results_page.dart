@@ -1,4 +1,3 @@
-import 'package:accenture_hackaton_2025/config/app_theme.dart';
 import 'package:accenture_hackaton_2025/presentation/common/button.dart';
 import 'package:accenture_hackaton_2025/presentation/common/text.dart';
 import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_loading_page.dart';

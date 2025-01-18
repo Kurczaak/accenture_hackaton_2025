@@ -8,13 +8,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NewSymptomPage extends StatefulWidget {
-  const NewSymptomPage({super.key});
+  final bool isOnboarding;
+
+  const NewSymptomPage({super.key, required this.isOnboarding});
 
   @override
-  _NewSymptomPageState createState() => _NewSymptomPageState();
+  _NewSymptomPageState createState() => _NewSymptomPageState(isOnboarding);
 }
 
 class _NewSymptomPageState extends State<NewSymptomPage> {
+  final isOnboarding;
+
+  _NewSymptomPageState(this.isOnboarding);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,6 +34,7 @@ class _NewSymptomPageState extends State<NewSymptomPage> {
           buttonStyle: _buttonStyle,
           stopButtonStyle: _stopButtonStyle,
           micButtonStyle: _micButtonStyle,
+          isOnboarding: isOnboarding,
         ),
       ),
     );
@@ -61,6 +68,7 @@ class _PageBody extends StatefulWidget {
     required ButtonStyle buttonStyle,
     required ButtonStyle stopButtonStyle,
     required ButtonStyle micButtonStyle,
+    required bool this.isOnboarding,
   })  : _buttonStyle = buttonStyle,
         _stopButtonStyle = stopButtonStyle,
         _micButtonStyle = micButtonStyle;
@@ -68,6 +76,7 @@ class _PageBody extends StatefulWidget {
   final ButtonStyle _buttonStyle;
   final ButtonStyle _stopButtonStyle;
   final ButtonStyle _micButtonStyle;
+  final bool isOnboarding;
 
   @override
   State<_PageBody> createState() => _PageBodyState();
@@ -129,7 +138,9 @@ class _PageBodyState extends State<_PageBody> {
                             context.read<ChatCubit>().writeMessage(value);
                           },
                           onSubmitted: (value) {
-                            context.read<ChatCubit>().sendMessage();
+                            context
+                                .read<ChatCubit>()
+                                .sendMessage(isOnboarding: widget.isOnboarding);
                           },
                           minLines: state.messages.length > 1 ? 2 : 10,
                           maxLines: 10,
@@ -186,7 +197,8 @@ class _PageBodyState extends State<_PageBody> {
                               style: widget._buttonStyle,
                               onPressed: () {
                                 if (state.userInput.isNotEmpty) {
-                                  context.read<ChatCubit>().sendMessage();
+                                  context.read<ChatCubit>().sendMessage(
+                                      isOnboarding: widget.isOnboarding);
                                 }
                               },
                             ),
@@ -234,7 +246,8 @@ class _PageBodyState extends State<_PageBody> {
                             style: widget._micButtonStyle,
                             onPressed: () {
                               if (state.userInput.isNotEmpty) {
-                                context.read<ChatCubit>().sendMessage();
+                                context.read<ChatCubit>().sendMessage(
+                                    isOnboarding: widget.isOnboarding);
                               }
                             },
                           ),

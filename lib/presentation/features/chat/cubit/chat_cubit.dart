@@ -13,7 +13,7 @@ import 'package:openai_dart/openai_dart.dart';
 part 'chat_cubit.freezed.dart';
 part 'chat_state.dart';
 
-@injectable
+@singleton
 class ChatCubit extends Cubit<ChatState> {
   ChatCubit()
       : super(const ChatState(
@@ -80,7 +80,7 @@ class ChatCubit extends Cubit<ChatState> {
     });
   }
 
-  Future<void> sendMessage() async {
+  Future<void> sendMessage({required bool isOnboarding}) async {
     final msgCopy = userMessage.copyWith();
     emit(
       state.copyWith(
@@ -97,6 +97,11 @@ class ChatCubit extends Cubit<ChatState> {
         images: [],
       ),
     );
+
+    if (isOnboarding) {
+      await collectSymptoms();
+    }
+
     await chatStream?.cancel();
     chatStream = client
         .createChatCompletionStream(
@@ -143,6 +148,63 @@ class ChatCubit extends Cubit<ChatState> {
     final images = [...state.images];
     images.removeAt(index);
     emit(state.copyWith(images: images));
+  }
+
+  Future<void> collectSymptoms() async {
+    // Define the function for symptom collection
+    const function = FunctionObject(
+      name: 'collect_symptoms',
+      description:
+          'Ask the user to provide a list of symptoms they are experiencing',
+      parameters: {
+        'type': 'object',
+        'properties': {
+          'symptoms': {
+            'type': 'array',
+            'items': {
+              'type': 'string',
+            },
+            'description': 'List of symptoms the user is experiencing',
+          },
+        },
+        'required': ['symptoms'],
+      },
+    );
+
+    // Ask for symptoms by creating the request for chat completion
+    final res1 = await client.createChatCompletion(
+      request: CreateChatCompletionRequest(
+        model: ChatCompletionModel.modelId('gpt-4o-mini'),
+        messages: [
+          ChatCompletionMessage.system(
+            content:
+                'You are a medical assistant that helps collect symptoms from users.',
+          ),
+          ChatCompletionMessage.user(
+            content: ChatCompletionUserMessageContent.string(
+              'Please list the symptoms you are experiencing.',
+            ),
+          ),
+        ],
+        functions: [function],
+      ),
+    );
+
+    // Parse the function arguments returned by the chat model
+    final arguments = json.decode(
+      res1.choices.first.message.functionCall!.arguments,
+    ) as Map<String, dynamic>;
+
+    // Extract symptoms from the function arguments
+    final List<String> symptoms =
+        List<String>.from(arguments['symptoms'] ?? []);
+
+    // Do something with the collected symptoms, like storing or processing them
+    print('XXX Symptoms collected: $symptoms');
+
+    emit(
+      state.copyWith(symptoms: [...state.symptoms, ...symptoms]),
+    );
   }
 }
 
