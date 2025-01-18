@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
 
 import 'package:accenture_hackaton_2025/presentation/features/chat/model/message.dart';
 import 'package:bloc/bloc.dart';
@@ -67,7 +66,7 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> uploadPhoto() async {
-    picker.pickImage(source: ImageSource.gallery).then((value) {
+    picker.pickImage(source: ImageSource.camera).then((value) {
       if (value != null) {
         emit(
           state.copyWith(
@@ -82,8 +81,23 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> sendMessage() async {
-    await Future.delayed(const Duration(seconds: 1));
-    chatStream?.cancel();
+    final msgCopy = userMessage.copyWith();
+    emit(
+      state.copyWith(
+        isLoading: true,
+        userInput: '',
+        messages: [
+          ...state.messages,
+          Message(
+            message: state.userInput,
+            isUser: true,
+            images: state.images,
+          )
+        ],
+        images: [],
+      ),
+    );
+    await chatStream?.cancel();
     chatStream = client
         .createChatCompletionStream(
             request: CreateChatCompletionRequest(
@@ -91,13 +105,12 @@ class ChatCubit extends Cubit<ChatState> {
             ChatCompletionModels.gpt4o,
           ),
           messages: [
-            userMessage,
+            msgCopy,
           ],
           seed: 423,
           n: 1,
         ))
         .listen(onData, onDone: onDone);
-    emit(state.copyWith(isLoading: true, userInput: ''));
   }
 
   void onData(CreateChatCompletionStreamResponse data) {
@@ -109,8 +122,7 @@ class ChatCubit extends Cubit<ChatState> {
 
     final combinedMessage = currentLastMessage + newContent;
     emit(state.copyWith(
-      lastMessage:
-          Message(message: combinedMessage, isUser: Random().nextBool()),
+      lastMessage: Message(message: combinedMessage, isUser: false),
     ));
   }
 
@@ -125,6 +137,12 @@ class ChatCubit extends Cubit<ChatState> {
 
   void toggleVoiceMode(bool isVoiceMode) {
     emit(state.copyWith(isVoiceMode: isVoiceMode));
+  }
+
+  Future<void> removeImage(int index) async {
+    final images = [...state.images];
+    images.removeAt(index);
+    emit(state.copyWith(images: images));
   }
 }
 
