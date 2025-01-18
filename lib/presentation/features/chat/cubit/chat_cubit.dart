@@ -9,6 +9,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 import 'package:openai_dart/openai_dart.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 part 'chat_cubit.freezed.dart';
 part 'chat_state.dart';
@@ -22,6 +24,21 @@ class ChatCubit extends Cubit<ChatState> {
 
   final client = OpenAIClient(apiKey: dotenv.get('OPEN_AI_KEY'));
   final ImagePicker picker = ImagePicker();
+  late bool _sttEnabled;
+
+  Future<void> init() async {
+    await Permission.microphone.request();
+    _sttEnabled = await SpeechToText().initialize(
+      onError: (error) => print(error),
+      onStatus: (status) {
+        if (status == 'done') {
+          sendMessage();
+          SpeechToText().stop();
+        }
+      },
+      debugLogging: true,
+    );
+  }
 
   List<ChatCompletionMessage> get stateMessages => state.messages.map((e) {
         if (e.isUser) {
@@ -35,7 +52,7 @@ class ChatCubit extends Cubit<ChatState> {
                   ChatCompletionMessageContentPart.image(
                     imageUrl: ChatCompletionMessageImageUrl(
                         url:
-                            "data:image/png;base64,${base64Encode(image.readAsBytesSync())}"),
+                            "data:image/jpg;base64,${base64Encode(image.readAsBytesSync())}"),
                   ),
               ],
             ),
@@ -57,7 +74,7 @@ class ChatCubit extends Cubit<ChatState> {
       content: ChatCompletionUserMessageContent.parts(
         [
           ChatCompletionMessageContentPart.text(
-            text: state.userInput,
+            text: state.sttText ?? state.userInput,
           ),
           for (final image in base64Images)
             ChatCompletionMessageContentPart.image(
@@ -112,11 +129,13 @@ class ChatCubit extends Cubit<ChatState> {
     emit(
       state.copyWith(
         isLoading: true,
+        isSTT: false,
+        sttText: null,
         userInput: '',
         messages: [
           ...state.messages,
           Message(
-            message: state.userInput,
+            message: state.sttText ?? state.userInput,
             isUser: true,
             images: state.images,
           )
@@ -177,6 +196,22 @@ class ChatCubit extends Cubit<ChatState> {
   close() async {
     await chatStream?.cancel();
     super.close();
+  }
+
+  Future<void> toggleSpeechToText() async {
+    if (state.isSTT) {
+      await SpeechToText().stop();
+      emit(state.copyWith(isSTT: false));
+      return;
+    } else if (_sttEnabled) {
+      emit(state.copyWith(isSTT: true));
+      await SpeechToText().listen(
+        onResult: (result) {
+          print('XDDDD ${result.recognizedWords}');
+          emit(state.copyWith(sttText: result.recognizedWords, isSTT: true));
+        },
+      );
+    }
   }
 }
 

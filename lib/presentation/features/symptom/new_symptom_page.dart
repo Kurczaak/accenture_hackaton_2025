@@ -23,7 +23,7 @@ class _NewSymptomPageState extends State<NewSymptomPage> {
       ),
       backgroundColor: AppTheme.backgroundColor,
       body: BlocProvider<ChatCubit>(
-        create: (context) => getIt<ChatCubit>(),
+        create: (context) => getIt<ChatCubit>()..init(),
         child: _PageBody(
           buttonStyle: _buttonStyle,
           stopButtonStyle: _stopButtonStyle,
@@ -90,7 +90,10 @@ class _PageBodyState extends State<_PageBody> {
       }
       return true;
     }, listener: (context, state) {
-      if (state.userInput.isEmpty) {
+      if (state.sttText != null) {
+        _textController.text = state.sttText!;
+      }
+      if (state.userInput.isEmpty && state.sttText == null) {
         _textController.clear();
       }
       if (state.lastMessage != null) {
@@ -183,11 +186,20 @@ class _PageBodyState extends State<_PageBody> {
                           },
                         ),
                         const SizedBox(width: 12),
-                        IconButton(
-                          icon: const Icon(Icons.mic),
-                          style: widget._buttonStyle,
-                          onPressed: () {
-                            context.read<ChatCubit>().toggleVoiceMode(true);
+                        BlocBuilder<ChatCubit, ChatState>(
+                          builder: (context, state) {
+                            return IconButton(
+                              icon: Icon(
+                                Icons.mic,
+                                color: state.isSTT
+                                    ? AppTheme.errorColor
+                                    : AppTheme.backgroundColor,
+                              ),
+                              style: widget._buttonStyle,
+                              onPressed: () {
+                                context.read<ChatCubit>().toggleSpeechToText();
+                              },
+                            );
                           },
                         ),
                         const Spacer(),
@@ -243,9 +255,7 @@ class _PageBodyState extends State<_PageBody> {
                         icon: const Icon(Icons.mic_rounded),
                         style: widget._micButtonStyle,
                         onPressed: () {
-                          if (state.userInput.isNotEmpty) {
-                            context.read<ChatCubit>().sendMessage();
-                          }
+                          context.read<ChatCubit>().toggleSpeechToText();
                         },
                       ),
                     ),
