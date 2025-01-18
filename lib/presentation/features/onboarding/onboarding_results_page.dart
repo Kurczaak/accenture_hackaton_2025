@@ -22,7 +22,6 @@ class OnboardingResultsPage extends StatelessWidget {
 
 class _Body extends StatelessWidget {
   const _Body({
-    super.key,
     required this.items,
   });
 

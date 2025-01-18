@@ -35,7 +35,6 @@ class _OnboardingResultsPageState extends State<OnboardingAppointmentsPage> {
 class _PageBody extends StatelessWidget {
   const _PageBody({
     required this.appointments,
-    super.key,
   });
 
   final List<Appointment> appointments;
@@ -46,20 +45,6 @@ class _PageBody extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Your Schedule'),
       ),
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12),
-        child: MyButton(
-          label: "Confinue",
-          onPressed: () {
-            context.read<ChatCubit>().clearState();
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-            );
-          },
-        ),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Column(
