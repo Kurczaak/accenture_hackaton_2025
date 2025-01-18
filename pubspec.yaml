@@ -27,7 +27,6 @@ dependencies:
 
   # UI
   gap: ^3.0.1
-  flutter_svg: ^1.0.0
 
   # Navigation
   auto_route: ^9.1.0
@@ -38,6 +37,7 @@ dependencies:
 
   # ENV
   flutter_dotenv: ^5.1.0
+  dart_openai: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -56,5 +56,4 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/onboarding/
-    - assets/images/app/
+    - dotenv

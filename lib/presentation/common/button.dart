@@ -12,7 +12,6 @@ class MyButton extends StatefulWidget {
   });
 
   @override
-  // ignore: no_logic_in_create_state
   State<MyButton> createState() => _MyButtonState(
         label: label,
         onPressed: onPressed,
