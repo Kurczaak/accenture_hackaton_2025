@@ -173,7 +173,7 @@ class ChatCubit extends Cubit<ChatState> {
 
     // Ask for symptoms by creating the request for chat completion
     final res1 = await client.createChatCompletion(
-      request: CreateChatCompletionRequest(
+      request: const CreateChatCompletionRequest(
         model: ChatCompletionModel.modelId('gpt-4o-mini'),
         messages: [
           ChatCompletionMessage.system(
