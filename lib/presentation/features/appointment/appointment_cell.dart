@@ -1,7 +1,10 @@
 import 'package:accenture_hackaton_2025/config/app_theme.dart';
+import 'package:accenture_hackaton_2025/di/injection.dart';
 import 'package:accenture_hackaton_2025/presentation/common/text.dart';
 import 'package:accenture_hackaton_2025/presentation/features/appointment/model/appointment.dart';
+import 'package:accenture_hackaton_2025/presentation/features/chat/cubit/chat_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class AppointmentCell extends StatelessWidget {
   final Appointment appointment;
@@ -10,6 +13,25 @@ class AppointmentCell extends StatelessWidget {
     super.key,
     required this.appointment,
   });
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => getIt<ChatCubit>()..init(),
+      child: Builder(builder: (context) {
+        return _PageBody(appointment: appointment);
+      }),
+    );
+  }
+}
+
+class _PageBody extends StatelessWidget {
+  _PageBody({
+    super.key,
+    required this.appointment,
+  });
+
+  final Appointment appointment;
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +74,23 @@ class AppointmentCell extends StatelessWidget {
             ElevatedButton(
               onPressed: () {
                 // Handle change date action
+                if (context
+                    .read<ChatCubit>()
+                    .state
+                    .scheduledAppointments
+                    .contains(appointment)) {
+                  context.read<ChatCubit>().unscheduleAppointment(appointment);
+                } else {
+                  context.read<ChatCubit>().scheduleAppointment(appointment);
+                }
               },
-              child: const Text('Change Date'),
+              child: Text(context
+                      .read<ChatCubit>()
+                      .state
+                      .scheduledAppointments
+                      .contains(appointment)
+                  ? 'Unshedule Appointment'
+                  : 'Schedule Appointment'),
             ),
           ],
         ),

@@ -11,6 +11,7 @@ abstract class ChatState with _$ChatState {
     @Default([]) List<String> symptoms,
     @Default(false) bool isSTT,
     @Default([]) List<Appointment> appointments,
+    @Default([]) List<Appointment> scheduledAppointments,
     String? sttText,
     String? errorMessage,
   }) = _ChatState;
