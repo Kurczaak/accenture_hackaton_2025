@@ -39,7 +39,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
             end: Alignment.bottomLeft,
             colors: [
               AppTheme.backgroundColor,
-              AppTheme.primaryColorLight,
+              AppTheme.primaryColor,
               AppTheme.primaryColor,
             ],
           ),

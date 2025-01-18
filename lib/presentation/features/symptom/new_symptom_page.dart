@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:accenture_hackaton_2025/config/app_theme.dart';
 import 'package:accenture_hackaton_2025/di/injection.dart';
+import 'package:accenture_hackaton_2025/presentation/features/babeczka/babeczka_page.dart';
 import 'package:accenture_hackaton_2025/presentation/features/chat/cubit/chat_cubit.dart';
 import 'package:accenture_hackaton_2025/presentation/features/chat/model/message.dart';
 import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_results_page.dart';
@@ -117,11 +118,7 @@ class _PageBodyState extends State<_PageBody> {
                     width: 200,
                     fit: BoxFit.contain,
                   ),
-                  Image.asset(
-                    'assets/images/app/doctor.png',
-                    width: 150,
-                    fit: BoxFit.contain,
-                  ),
+                  const BabeczkaWidget(scale: .5),
                 ],
               ),
               Expanded(
@@ -217,8 +214,8 @@ class _PageBodyState extends State<_PageBody> {
                               );
                             },
                           ),
-                          if (state.symptoms.length > 0) ...[
-                            SizedBox(width: 12),
+                          if (state.symptoms.isNotEmpty) ...[
+                            const SizedBox(width: 12),
                             IconButton(
                               onPressed: () {
                                 Navigator.of(context).push(
@@ -257,12 +254,8 @@ class _PageBodyState extends State<_PageBody> {
         return Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Flexible(
-              child: Image.asset(
-                'assets/images/app/doctor.png',
-                width: double.infinity,
-                fit: BoxFit.contain,
-              ),
+            const Flexible(
+              child: BabeczkaWidget(scale: .5),
             ),
             DecoratedBox(
               decoration: const BoxDecoration(
