@@ -1,6 +1,7 @@
 import 'package:accenture_hackaton_2025/config/app_theme.dart';
 import 'package:accenture_hackaton_2025/presentation/common/button.dart';
 import 'package:accenture_hackaton_2025/presentation/common/text.dart';
+import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_chat_page.dart';
 import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_loading_page.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -32,7 +33,8 @@ class _OnboardingPageState extends State<OnboardingPage> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => OnboardingLoadingPage()),
+              MaterialPageRoute(
+                  builder: (context) => const OnboardingChatPage()),
             );
           },
         ),
