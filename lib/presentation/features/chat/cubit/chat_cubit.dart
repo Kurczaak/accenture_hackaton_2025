@@ -144,6 +144,12 @@ class ChatCubit extends Cubit<ChatState> {
     images.removeAt(index);
     emit(state.copyWith(images: images));
   }
+
+  @override
+  close() async {
+    await chatStream?.cancel();
+    super.close();
+  }
 }
 
 extension IterableExt<T> on Iterable<T> {
