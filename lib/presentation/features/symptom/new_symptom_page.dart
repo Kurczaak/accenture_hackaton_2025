@@ -1,5 +1,9 @@
 import 'package:accenture_hackaton_2025/config/app_theme.dart';
+import 'package:accenture_hackaton_2025/di/injection.dart';
+import 'package:accenture_hackaton_2025/presentation/features/chat/cubit/chat_cubit.dart';
+import 'package:accenture_hackaton_2025/presentation/features/chat/model/message.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class NewSymptomPage extends StatefulWidget {
   @override
@@ -7,17 +11,6 @@ class NewSymptomPage extends StatefulWidget {
 }
 
 class _NewSymptomPageState extends State<NewSymptomPage> {
-  TextEditingController _symptomController = TextEditingController();
-
-  bool isRecording = false;
-
-  @override
-  void dispose() {
-    // Dispose the controller when the widget is disposed
-    _symptomController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,60 +18,10 @@ class _NewSymptomPageState extends State<NewSymptomPage> {
         title: const Text('New Symptom'),
       ),
       backgroundColor: AppTheme.backgroundColor,
-      body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12),
-            color: AppTheme.backgroundColor,
-          ),
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _symptomController,
-                  minLines: 14,
-                  maxLines: null,
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(12),
-                      ),
-                    ),
-                    hintText:
-                        'Enter your symptom details here or tap the mic button to record a voice message',
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.attach_file),
-                      style: _buttonStyle,
-                      onPressed: () {
-                        // Handle attachment action
-                      },
-                    ),
-                    Spacer(),
-                    if (isRecording)
-                      IconButton(
-                        icon: const Icon(Icons.stop),
-                        style: _stopButtonStyle,
-                        onPressed: () {},
-                      ),
-                    if (!isRecording)
-                      IconButton(
-                        icon: const Icon(Icons.mic),
-                        style: _buttonStyle,
-                        onPressed: () {},
-                      ),
-                  ],
-                )
-              ],
-            ),
-          ),
-        ),
+      body: BlocProvider<ChatCubit>(
+        create: (context) => getIt<ChatCubit>(),
+        child: _PageBody(
+            buttonStyle: _buttonStyle, stopButtonStyle: _stopButtonStyle),
       ),
     );
   }
@@ -98,4 +41,169 @@ class _NewSymptomPageState extends State<NewSymptomPage> {
     backgroundColor: WidgetStatePropertyAll(AppTheme.errorColor),
     iconColor: WidgetStatePropertyAll(AppTheme.textColorLight),
   );
+}
+
+class _PageBody extends StatefulWidget {
+  const _PageBody({
+    super.key,
+    required ButtonStyle buttonStyle,
+    required ButtonStyle stopButtonStyle,
+  })  : _buttonStyle = buttonStyle,
+        _stopButtonStyle = stopButtonStyle;
+
+  final ButtonStyle _buttonStyle;
+  final ButtonStyle _stopButtonStyle;
+
+  @override
+  State<_PageBody> createState() => _PageBodyState();
+}
+
+class _PageBodyState extends State<_PageBody> {
+  final _textController = TextEditingController();
+  bool isRecording = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<ChatCubit, ChatState>(
+        listener: (context, state) => {
+              if (state.lastMessage != null)
+                {
+                  _textController.clear(),
+                }
+            },
+        builder: (context, state) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
+                    child: Column(
+                      children: [
+                        ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: state.messages.length +
+                              (state.lastMessage != null ? 1 : 0),
+                          itemBuilder: (context, index) {
+                            if (state.lastMessage != null &&
+                                index == state.messages.length) {
+                              return _chatBubble(message: state.lastMessage!);
+                            }
+                            final message = state.messages[index];
+                            return _chatBubble(message: message);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: AppTheme.backgroundColor,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _textController,
+                        onChanged: (value) {
+                          context.read<ChatCubit>().writeMessage(value);
+                        },
+                        onSubmitted: (value) {
+                          context.read<ChatCubit>().sendMessage();
+                        },
+                        minLines: state.messages.length > 1 ? 2 : 10,
+                        maxLines: 10,
+                        decoration: const InputDecoration(
+                          fillColor: AppTheme.textColorLight,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(12),
+                            ),
+                          ),
+                          hintText:
+                              'Enter your symptom details here or tap the mic button to record a voice message',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.attach_file),
+                            style: widget._buttonStyle,
+                            onPressed: () {
+                              // Handle attachment action
+                            },
+                          ),
+                          const SizedBox(width: 12),
+                          if (isRecording)
+                            IconButton(
+                              icon: const Icon(Icons.stop),
+                              style: widget._stopButtonStyle,
+                              onPressed: () {
+                                isRecording = false;
+                              },
+                            ),
+                          if (!isRecording)
+                            IconButton(
+                              icon: const Icon(Icons.mic),
+                              style: widget._buttonStyle,
+                              onPressed: () {
+                                isRecording = true;
+                              },
+                            ),
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            style: widget._buttonStyle,
+                            onPressed: () {
+                              if (state.userInput.isNotEmpty) {
+                                context.read<ChatCubit>().sendMessage();
+                              }
+                            },
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        });
+  }
+
+  _chatBubble({
+    required Message message,
+  }) {
+    return ListTile(
+      title: Align(
+        alignment: (message.isUser ?? false)
+            ? Alignment.centerRight
+            : Alignment.centerLeft,
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            color: (message.isUser ?? false)
+                ? AppTheme.primaryColorLight
+                : AppTheme.textHintColor,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              message.message,
+              style: TextStyle(
+                  color: (message.isUser ?? false)
+                      ? AppTheme.textColorLight
+                      : AppTheme.textColorDark),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

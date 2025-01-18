@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:accenture_hackaton_2025/presentation/features/chat/model/message.dart';
 import 'package:bloc/bloc.dart';
@@ -108,7 +109,8 @@ class ChatCubit extends Cubit<ChatState> {
 
     final combinedMessage = currentLastMessage + newContent;
     emit(state.copyWith(
-      lastMessage: Message(message: combinedMessage),
+      lastMessage:
+          Message(message: combinedMessage, isUser: Random().nextBool()),
     ));
   }
 
