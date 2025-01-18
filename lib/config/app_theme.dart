@@ -9,7 +9,7 @@ class AppTheme {
   static const Color secondaryColor = Color(0xFF00BFA5);
   static const Color secondaryColorLight = Color(0xFF5DF2D6);
   static const Color secondaryColorDark = Color(0xFF008E76);
-  static const Color backgroundColor = Color(0xFFE0E0E0);
+  static const Color backgroundColor = Color(0xFFFCFCFC);
   static const Color errorColor = Color(0xFFD32F2F);
   static const Color successColor = Color(0xFF388E3C);
   static const Color warningColor = Color(0xFFFFA000);
