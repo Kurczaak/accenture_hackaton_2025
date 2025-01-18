@@ -9,6 +9,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 import 'package:openai_dart/openai_dart.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 part 'chat_cubit.freezed.dart';
 part 'chat_state.dart';
@@ -22,6 +24,47 @@ class ChatCubit extends Cubit<ChatState> {
 
   final client = OpenAIClient(apiKey: dotenv.get('OPEN_AI_KEY'));
   final ImagePicker picker = ImagePicker();
+  late bool _sttEnabled;
+
+  Future<void> init() async {
+    await Permission.microphone.request();
+    _sttEnabled = await SpeechToText().initialize(
+      onError: (error) => print(error),
+      onStatus: (status) {
+        if (status == 'done') {
+          sendMessage(isOnboarding: false);
+          SpeechToText().stop();
+        }
+      },
+      debugLogging: true,
+    );
+  }
+
+  List<ChatCompletionMessage> get stateMessages => state.messages.map((e) {
+        if (e.isUser) {
+          return ChatCompletionMessage.user(
+            content: ChatCompletionUserMessageContent.parts(
+              [
+                ChatCompletionMessageContentPart.text(
+                  text: e.message,
+                ),
+                for (final image in e.images)
+                  ChatCompletionMessageContentPart.image(
+                    imageUrl: ChatCompletionMessageImageUrl(
+                        url:
+                            "data:image/jpg;base64,${base64Encode(image.readAsBytesSync())}"),
+                  ),
+              ],
+            ),
+            role: ChatCompletionMessageRole.user,
+          );
+        } else {
+          return ChatCompletionMessage.assistant(
+            content: e.message,
+            role: ChatCompletionMessageRole.assistant,
+          );
+        }
+      }).toList();
 
   ChatCompletionMessage get userMessage {
     final base64Images =
@@ -31,7 +74,7 @@ class ChatCubit extends Cubit<ChatState> {
       content: ChatCompletionUserMessageContent.parts(
         [
           ChatCompletionMessageContentPart.text(
-            text: state.userInput,
+            text: state.sttText ?? state.userInput,
           ),
           for (final image in base64Images)
             ChatCompletionMessageContentPart.image(
@@ -81,15 +124,18 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> sendMessage({required bool isOnboarding}) async {
+    final msgsCopy = [...stateMessages];
     final msgCopy = userMessage.copyWith();
     emit(
       state.copyWith(
         isLoading: true,
+        isSTT: false,
+        sttText: null,
         userInput: '',
         messages: [
           ...state.messages,
           Message(
-            message: state.userInput,
+            message: state.sttText ?? state.userInput,
             isUser: true,
             images: state.images,
           )
@@ -110,6 +156,7 @@ class ChatCubit extends Cubit<ChatState> {
             ChatCompletionModels.gpt4o,
           ),
           messages: [
+            ...msgsCopy,
             msgCopy,
           ],
           seed: 423,
@@ -171,28 +218,42 @@ class ChatCubit extends Cubit<ChatState> {
       },
     );
 
+    const tool = ChatCompletionTool(
+        type: ChatCompletionToolType.function, function: function);
+
     // Ask for symptoms by creating the request for chat completion
     final res1 = await client.createChatCompletion(
-      request: const CreateChatCompletionRequest(
-        model: ChatCompletionModel.modelId('gpt-4o-mini'),
+      request: CreateChatCompletionRequest(
+        model: const ChatCompletionModel.model(ChatCompletionModels.gpt4o),
         messages: [
-          ChatCompletionMessage.system(
+          const ChatCompletionMessage.system(
             content:
-                'You are a medical assistant that helps collect symptoms from users.',
+                'You are a medical assistant that helps collect symptoms from users. Always use collect_symptoms function to collect symptoms.',
           ),
-          ChatCompletionMessage.user(
+          const ChatCompletionMessage.user(
             content: ChatCompletionUserMessageContent.string(
               'Please list the symptoms you are experiencing.',
             ),
           ),
+          ...stateMessages,
         ],
-        functions: [function],
+        tools: [tool],
+        toolChoice: const ChatCompletionToolChoiceOption.tool(
+          ChatCompletionNamedToolChoice(
+            type: ChatCompletionNamedToolChoiceType.function,
+            function:
+                ChatCompletionFunctionCallOption(name: 'collect_symptoms'),
+          ),
+        ),
       ),
     );
-
+    if (res1.choices.first.message.toolCalls?.first.function.arguments ==
+        null) {
+      return;
+    }
     // Parse the function arguments returned by the chat model
     final arguments = json.decode(
-      res1.choices.first.message.functionCall!.arguments,
+      res1.choices.first.message.toolCalls!.first.function.arguments,
     ) as Map<String, dynamic>;
 
     // Extract symptoms from the function arguments
@@ -205,6 +266,29 @@ class ChatCubit extends Cubit<ChatState> {
     emit(
       state.copyWith(symptoms: [...state.symptoms, ...symptoms]),
     );
+  }
+
+  @override
+  close() async {
+    await chatStream?.cancel();
+    await SpeechToText().stop();
+    super.close();
+  }
+
+  Future<void> toggleSpeechToText() async {
+    if (state.isSTT) {
+      await SpeechToText().stop();
+      emit(state.copyWith(isSTT: false));
+      return;
+    } else if (_sttEnabled) {
+      emit(state.copyWith(isSTT: true));
+      await SpeechToText().listen(
+        onResult: (result) {
+          print('XDDDD ${result.recognizedWords}');
+          emit(state.copyWith(sttText: result.recognizedWords, isSTT: true));
+        },
+      );
+    }
   }
 }
 

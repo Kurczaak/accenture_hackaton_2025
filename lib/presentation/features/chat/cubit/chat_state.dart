@@ -13,6 +13,8 @@ abstract class ChatState with _$ChatState {
     @Default('') String userInput,
     @Default([]) List<File> images,
     @Default([]) List<String> symptoms,
+    @Default(false) bool isSTT,
+    String? sttText,
     String? errorMessage,
   }) = _ChatState;
 }
