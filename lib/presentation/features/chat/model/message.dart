@@ -6,6 +6,7 @@ part 'message.freezed.dart';
 abstract class Message with _$Message {
   const factory Message({
     required String message,
+    required bool? isUser,
     List<String>? images,
   }) = _Message;
 }
