@@ -2,6 +2,7 @@ import 'package:accenture_hackaton_2025/presentation/common/text.dart';
 import 'package:accenture_hackaton_2025/presentation/features/chat/chat_page.dart';
 import 'package:accenture_hackaton_2025/presentation/features/onboarding/onbarding_page.dart';
 import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_loading_page.dart';
+import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_results_page.dart';
 import 'package:accenture_hackaton_2025/presentation/features/symptom/new_symptom_page.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
@@ -60,6 +61,19 @@ class HomePage extends StatelessWidget {
                   );
                 },
                 child: const MyText(text: 'Onboarding Loading'),
+              ),
+              TextButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const OnboardingResultsPage(
+                        items: ["Something bad with blood"],
+                      ),
+                    ),
+                  );
+                },
+                child: const MyText(text: 'Onboarding Results'),
               ),
             ],
           ),

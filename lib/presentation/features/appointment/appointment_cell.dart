@@ -1,0 +1,63 @@
+import 'package:accenture_hackaton_2025/config/app_theme.dart';
+import 'package:accenture_hackaton_2025/presentation/common/text.dart';
+import 'package:accenture_hackaton_2025/presentation/features/appointment/model/appointment.dart';
+import 'package:flutter/material.dart';
+
+class AppointmentCell extends StatelessWidget {
+  final Appointment appointment;
+
+  const AppointmentCell({
+    super.key,
+    required this.appointment,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(
+          color: Colors.grey,
+          width: 1,
+        ),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              appointment.appointmentName,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 4),
+            MyText(
+              text:
+                  '${appointment.date.day}/${appointment.date.month}/${appointment.date.year} | ${appointment.date.hour}:${appointment.date.minute}',
+            ),
+            const SizedBox(height: 8),
+            MyText(
+              text: 'Office: ${appointment.office}',
+            ),
+            const SizedBox(height: 8),
+            MyText(
+              text: 'Doctor: ${appointment.doctor}',
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () {
+                // Handle change date action
+              },
+              child: const Text('Change Date'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
