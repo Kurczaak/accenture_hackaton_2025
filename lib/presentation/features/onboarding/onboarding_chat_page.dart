@@ -11,7 +11,7 @@ class OnboardingChatPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ChatCubit>(
-      create: (context) => getIt<ChatCubit>(),
+      create: (context) => getIt<ChatCubit>()..init(),
       child: _PageBody(),
     );
   }
@@ -23,12 +23,12 @@ class _PageBody extends StatelessWidget {
     return BlocListener<ChatCubit, ChatState>(
       listener: (context, state) {
         // Check if symptoms list is not empty
-        if (state.symptoms.isNotEmpty) {
+        if (state.symptoms.length > 2) {
           // Print to verify it's triggering
           print("XXX Hello");
 
           // Perform navigation when symptoms change
-          Navigator.of(context).pushReplacement(
+          Navigator.of(context).push(
             MaterialPageRoute(
               builder: (context) => OnboardingResultsPage(
                 items: state.symptoms,

@@ -151,11 +151,6 @@ class _PageBodyState extends State<_PageBody> {
                       onChanged: (value) {
                         context.read<ChatCubit>().writeMessage(value);
                       },
-                      onSubmitted: (value) {
-                        context
-                            .read<ChatCubit>()
-                            .sendMessage(isOnboarding: widget.isOnboarding);
-                      },
                       minLines: state.messages.length > 1 ? 2 : 10,
                       maxLines: 10,
                       decoration: const InputDecoration(
@@ -343,6 +338,12 @@ class _PageBodyState extends State<_PageBody> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
   }
 }
 

@@ -1,12 +1,17 @@
+import 'package:accenture_hackaton_2025/di/injection.dart';
 import 'package:accenture_hackaton_2025/presentation/common/button.dart';
 import 'package:accenture_hackaton_2025/presentation/common/text.dart';
 import 'package:accenture_hackaton_2025/presentation/features/appointment/appointment_cell.dart';
 import 'package:accenture_hackaton_2025/presentation/features/appointment/model/appointment.dart';
+import 'package:accenture_hackaton_2025/presentation/features/chat/cubit/chat_cubit.dart';
 import 'package:accenture_hackaton_2025/presentation/features/home/home_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class OnboardingAppointmentsPage extends StatefulWidget {
-  const OnboardingAppointmentsPage({super.key});
+  const OnboardingAppointmentsPage({super.key, required this.appointments});
+
+  final List<Appointment> appointments;
 
   @override
   State<OnboardingAppointmentsPage> createState() =>
@@ -14,7 +19,26 @@ class OnboardingAppointmentsPage extends StatefulWidget {
 }
 
 class _OnboardingResultsPageState extends State<OnboardingAppointmentsPage> {
-  final _scrollController = ScrollController();
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => getIt<ChatCubit>()..init(),
+      child: Builder(builder: (context) {
+        return _PageBody(
+          appointments: widget.appointments,
+        );
+      }),
+    );
+  }
+}
+
+class _PageBody extends StatelessWidget {
+  const _PageBody({
+    required this.appointments,
+    super.key,
+  });
+
+  final List<Appointment> appointments;
 
   @override
   Widget build(BuildContext context) {
@@ -27,6 +51,7 @@ class _OnboardingResultsPageState extends State<OnboardingAppointmentsPage> {
         child: MyButton(
           label: "Confinue",
           onPressed: () {
+            context.read<ChatCubit>().clearState();
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const HomePage()),
@@ -36,7 +61,7 @@ class _OnboardingResultsPageState extends State<OnboardingAppointmentsPage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Column(
           children: [
             const Align(
@@ -47,24 +72,26 @@ class _OnboardingResultsPageState extends State<OnboardingAppointmentsPage> {
               ),
             ),
             const SizedBox(height: 24),
-            ListView.builder(
-              controller: _scrollController,
-              shrinkWrap: true,
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return Column(
-                  children: [
-                    AppointmentCell(
-                      appointment: Appointment(
-                          appointmentName: "Blood tests",
-                          date: DateTime.now(),
-                          office: "Office 20.2",
-                          doctor: "Mike Peterson"),
-                    ),
-                    const SizedBox(height: 16),
-                  ],
-                );
-              },
+            Expanded(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: appointments.length,
+                itemBuilder: (context, index) {
+                  return Column(
+                    children: [
+                      AppointmentCell(
+                        appointment: Appointment(
+                          appointmentName: appointments[index].appointmentName,
+                          date: appointments[index].date,
+                          office: appointments[index].office,
+                          doctor: appointments[index].doctor,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
+                  );
+                },
+              ),
             ),
           ],
         ),

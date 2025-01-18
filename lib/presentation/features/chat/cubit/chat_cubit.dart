@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:accenture_hackaton_2025/presentation/features/appointment/model/appointment.dart';
 import 'package:accenture_hackaton_2025/presentation/features/chat/model/message.dart';
 import 'package:bloc/bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -128,7 +129,6 @@ class ChatCubit extends Cubit<ChatState> {
     final msgCopy = userMessage.copyWith();
     emit(
       state.copyWith(
-        isLoading: true,
         isSTT: false,
         sttText: null,
         userInput: '',
@@ -264,15 +264,10 @@ class ChatCubit extends Cubit<ChatState> {
     print('XXX Symptoms collected: $symptoms');
 
     emit(
-      state.copyWith(symptoms: [...state.symptoms, ...symptoms]),
+      state.copyWith(
+        symptoms: [...state.symptoms, ...symptoms],
+      ),
     );
-  }
-
-  @override
-  close() async {
-    await chatStream?.cancel();
-    await SpeechToText().stop();
-    super.close();
   }
 
   Future<void> toggleSpeechToText() async {
@@ -289,6 +284,122 @@ class ChatCubit extends Cubit<ChatState> {
         },
       );
     }
+  }
+
+  Future<void> suggestAppointments() async {
+    // 1. Define the function for suggesting appointments
+    const function = FunctionObject(
+      name: 'suggest_appointments',
+      description:
+          'Suggest up to 10 potential appointments based on user symptoms. '
+          'Return an array of appointments with fields: '
+          '[appointmentName, date, office, doctor].',
+      parameters: {
+        'type': 'object',
+        'properties': {
+          'appointments': {
+            'type': 'array',
+            'items': {
+              'type': 'object',
+              'properties': {
+                'appointmentName': {'type': 'string'},
+                'date': {
+                  'type': 'string',
+                  'format': 'date-time',
+                  'description': 'Date/Time in ISO-8601 format'
+                },
+                'office': {'type': 'string'},
+                'doctor': {'type': 'string'},
+              },
+              'required': [
+                'appointmentName',
+                'date',
+                'office',
+                'doctor',
+              ],
+            },
+            'description':
+                'A list of up to 10 appointments suggested for the given symptoms.',
+          },
+        },
+        'required': ['appointments'],
+      },
+    );
+
+    // 2. Create a tool out of this function
+    const tool = ChatCompletionTool(
+      type: ChatCompletionToolType.function,
+      function: function,
+    );
+
+    // 3. Build your prompt with relevant context and your stored symptoms
+    final symptomList = state.symptoms.join(', ');
+    final prompt = 'The user has the following symptoms: $symptomList.\n'
+        'Suggest up to 10 potential medical appointments that might be relevant, '
+        'including realistic future dates, doctor names, office location/number, '
+        'and a short appointment description (e.g., "Blood test").';
+
+    // 4. Request the chat completion to invoke the `suggest_appointments` function
+    final res = await client.createChatCompletion(
+      request: CreateChatCompletionRequest(
+        model: const ChatCompletionModel.model(ChatCompletionModels.gpt4o),
+        messages: [
+          const ChatCompletionMessage.system(
+            content:
+                'You are a medical assistant that suggests appointments based on user symptoms. '
+                'Always use the suggest_appointments function to do so.',
+          ),
+          ChatCompletionMessage.user(
+            content: ChatCompletionUserMessageContent.string(prompt),
+          ),
+        ],
+        tools: [tool],
+        toolChoice: const ChatCompletionToolChoiceOption.tool(
+          ChatCompletionNamedToolChoice(
+            type: ChatCompletionNamedToolChoiceType.function,
+            function:
+                ChatCompletionFunctionCallOption(name: 'suggest_appointments'),
+          ),
+        ),
+      ),
+    );
+
+    // 5. Check if the tool call has the arguments we need
+    if (res.choices.isEmpty ||
+        res.choices.first.message.toolCalls == null ||
+        res.choices.first.message.toolCalls!.isEmpty) {
+      return;
+    }
+
+    // 6. Parse the function arguments returned by the chat model
+    final rawArguments =
+        res.choices.first.message.toolCalls!.first.function.arguments;
+    final Map<String, dynamic> arguments = json.decode(rawArguments);
+
+    // 7. Extract the array of appointments from the function arguments
+    final List<dynamic> rawAppointments = arguments['appointments'] ?? [];
+
+    // 8. Convert each raw appointment to an Appointment object
+    final List<Appointment> appointments = rawAppointments
+        .map((apt) => Appointment.fromJson(apt as Map<String, dynamic>))
+        .toList();
+
+    // 9. Do something with the suggested appointments (store, display, etc.)
+    // For now, we'll simply print them and emit them in state.
+    for (var appointment in appointments) {
+      print(
+          'Suggested: ${appointment.appointmentName} with Dr. ${appointment.doctor} '
+          'at ${appointment.office} on ${appointment.date}');
+    }
+
+    // If you want to store these in your state:
+    emit(
+      state.copyWith(appointments: [...appointments], symptoms: []),
+    );
+  }
+
+  void clearState() {
+    emit(const ChatState(messages: []));
   }
 }
 
