@@ -1,9 +1,19 @@
+import 'package:accenture_hackaton_2025/di/injection.dart';
 import 'package:accenture_hackaton_2025/router/router.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await dotenv.load(
+    fileName: 'dotenv',
+  );
+
+  OpenAI.apiKey = dotenv.get('OPEN_AI_KEY');
+  await configureDependencies();
   runApp(MainApp());
 }
 
