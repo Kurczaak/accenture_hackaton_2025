@@ -61,12 +61,21 @@ class _PageBody extends StatelessWidget {
                     ),
                   ),
                   SizedBox(
-                    width: 40,
+                    width: 100,
                     child: ElevatedButton(
                       onPressed: () {
                         context.read<ChatCubit>().sendMessage();
                       },
                       child: const Text('Send'),
+                    ),
+                  ),
+                  SizedBox(
+                    width: 100,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        context.read<ChatCubit>().addFile();
+                      },
+                      child: const Text('Upload image'),
                     ),
                   )
                 ],
