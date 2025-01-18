@@ -1,6 +1,7 @@
 import 'package:accenture_hackaton_2025/router/router.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/foundation.dart';
+import 'package:accenture_hackaton_2025/presentation/features/onboarding/splash_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() {
