@@ -9,6 +9,7 @@ abstract class ChatState with _$ChatState {
     @Default(false) bool isSuccess,
     @Default(false) bool isFailure,
     @Default(false) bool isRecording,
+    @Default(false) bool isVoiceMode,
     @Default('') String userInput,
     @Default([]) List<File> images,
     String? errorMessage,

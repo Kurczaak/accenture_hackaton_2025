@@ -122,6 +122,10 @@ class ChatCubit extends Cubit<ChatState> {
           : state.messages,
     ));
   }
+
+  void toggleVoiceMode(bool isVoiceMode) {
+    emit(state.copyWith(isVoiceMode: isVoiceMode));
+  }
 }
 
 extension IterableExt<T> on Iterable<T> {
