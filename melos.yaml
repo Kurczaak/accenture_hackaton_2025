@@ -1,0 +1,13 @@
+name: melos
+
+packages:
+  # Include the package in the workspace root
+  - .
+
+scripts:
+  builder:
+    exec: dart run build_runner build --delete-conflicting-outputs
+  clean:
+    exec: flutter clean
+  analyze:
+    exec: dart analyze .
