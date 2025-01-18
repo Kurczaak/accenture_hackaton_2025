@@ -27,6 +27,7 @@ dependencies:
 
   # UI
   gap: ^3.0.1
+  lottie: ^3.3.0
 
   # Navigation
   auto_route: ^9.1.0
@@ -61,3 +62,4 @@ flutter:
     - assets/images/
     - assets/images/app/
     - assets/images/onboarding/
+    - assets/lottie/
