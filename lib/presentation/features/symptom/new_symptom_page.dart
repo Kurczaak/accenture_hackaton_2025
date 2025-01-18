@@ -80,7 +80,16 @@ class _PageBodyState extends State<_PageBody> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ChatCubit, ChatState>(listener: (context, state) {
+    return BlocConsumer<ChatCubit, ChatState>(listenWhen: (previous, current) {
+      if (previous.lastMessage != null && current.lastMessage == null) {
+        _scollController.animateTo(
+          _scollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.linear,
+        );
+      }
+      return true;
+    }, listener: (context, state) {
       if (state.userInput.isEmpty) {
         _textController.clear();
       }

@@ -23,6 +23,32 @@ class ChatCubit extends Cubit<ChatState> {
   final client = OpenAIClient(apiKey: dotenv.get('OPEN_AI_KEY'));
   final ImagePicker picker = ImagePicker();
 
+  List<ChatCompletionMessage> get stateMessages => state.messages.map((e) {
+        if (e.isUser) {
+          return ChatCompletionMessage.user(
+            content: ChatCompletionUserMessageContent.parts(
+              [
+                ChatCompletionMessageContentPart.text(
+                  text: e.message,
+                ),
+                for (final image in e.images)
+                  ChatCompletionMessageContentPart.image(
+                    imageUrl: ChatCompletionMessageImageUrl(
+                        url:
+                            "data:image/png;base64,${base64Encode(image.readAsBytesSync())}"),
+                  ),
+              ],
+            ),
+            role: ChatCompletionMessageRole.user,
+          );
+        } else {
+          return ChatCompletionMessage.assistant(
+            content: e.message,
+            role: ChatCompletionMessageRole.assistant,
+          );
+        }
+      }).toList();
+
   ChatCompletionMessage get userMessage {
     final base64Images =
         state.images.map((e) => base64Encode(e.readAsBytesSync())).toList();
@@ -81,6 +107,7 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> sendMessage() async {
+    final msgsCopy = [...stateMessages];
     final msgCopy = userMessage.copyWith();
     emit(
       state.copyWith(
@@ -105,6 +132,7 @@ class ChatCubit extends Cubit<ChatState> {
             ChatCompletionModels.gpt4o,
           ),
           messages: [
+            ...msgsCopy,
             msgCopy,
           ],
           seed: 423,
