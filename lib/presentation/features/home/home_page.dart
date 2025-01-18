@@ -1,19 +1,7 @@
-import 'package:flutter/material.dart';
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(body: Container());
-  }
-}
-
 import 'package:accenture_hackaton_2025/presentation/common/text.dart';
 import 'package:accenture_hackaton_2025/presentation/features/onboarding/onbarding_page.dart';
-import 'package:accenture_hackaton_2025/router/router.gr.dart';
-import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
+import 'package:flutter/material.dart';
 
 @RoutePage()
 class HomePage extends StatelessWidget {
