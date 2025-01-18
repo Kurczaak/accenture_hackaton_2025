@@ -4,6 +4,7 @@ import 'package:accenture_hackaton_2025/config/app_theme.dart';
 import 'package:accenture_hackaton_2025/di/injection.dart';
 import 'package:accenture_hackaton_2025/presentation/features/chat/cubit/chat_cubit.dart';
 import 'package:accenture_hackaton_2025/presentation/features/chat/model/message.dart';
+import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_results_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -32,7 +33,6 @@ class _NewSymptomPageState extends State<NewSymptomPage> {
         create: (context) => getIt<ChatCubit>()..init(),
         child: _PageBody(
           buttonStyle: _buttonStyle,
-          stopButtonStyle: _stopButtonStyle,
           micButtonStyle: _micButtonStyle,
           isOnboarding: isOnboarding,
         ),
@@ -48,14 +48,6 @@ class _NewSymptomPageState extends State<NewSymptomPage> {
     iconColor: WidgetStatePropertyAll(AppTheme.textColorLight),
   );
 
-  final _stopButtonStyle = const ButtonStyle(
-    padding: WidgetStatePropertyAll(
-      EdgeInsets.all(12),
-    ),
-    backgroundColor: WidgetStatePropertyAll(AppTheme.errorColor),
-    iconColor: WidgetStatePropertyAll(AppTheme.textColorLight),
-  );
-
   final _micButtonStyle = const ButtonStyle(
     backgroundColor: WidgetStatePropertyAll(AppTheme.errorColor),
     iconColor: WidgetStatePropertyAll(AppTheme.textColorLight),
@@ -64,17 +56,13 @@ class _NewSymptomPageState extends State<NewSymptomPage> {
 
 class _PageBody extends StatefulWidget {
   const _PageBody({
-    super.key,
     required ButtonStyle buttonStyle,
-    required ButtonStyle stopButtonStyle,
     required ButtonStyle micButtonStyle,
     required this.isOnboarding,
   })  : _buttonStyle = buttonStyle,
-        _stopButtonStyle = stopButtonStyle,
         _micButtonStyle = micButtonStyle;
 
   final ButtonStyle _buttonStyle;
-  final ButtonStyle _stopButtonStyle;
   final ButtonStyle _micButtonStyle;
   final bool isOnboarding;
 
@@ -209,6 +197,22 @@ class _PageBodyState extends State<_PageBody> {
                             );
                           },
                         ),
+                        if (state.symptoms.length > 0) ...[
+                          SizedBox(width: 12),
+                          IconButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => OnboardingResultsPage(
+                                    items: state.symptoms,
+                                  ),
+                                ),
+                              );
+                            },
+                            style: widget._buttonStyle,
+                            icon: const Icon(Icons.arrow_forward),
+                          ),
+                        ],
                         const Spacer(),
                         IconButton(
                           icon: const Icon(Icons.send),
@@ -348,7 +352,7 @@ class _PageBodyState extends State<_PageBody> {
 }
 
 class _ImagesPreviewRow extends StatelessWidget {
-  const _ImagesPreviewRow({super.key});
+  const _ImagesPreviewRow();
 
   @override
   Widget build(BuildContext context) {

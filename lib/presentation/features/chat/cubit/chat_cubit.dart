@@ -420,6 +420,13 @@ class ChatCubit extends Cubit<ChatState> {
       ),
     );
   }
+
+  @override
+  Future<void> close() async {
+    chatStream?.cancel();
+
+    // return super.close();
+  }
 }
 
 extension IterableExt<T> on Iterable<T> {

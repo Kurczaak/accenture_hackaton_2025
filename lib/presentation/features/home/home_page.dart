@@ -1,13 +1,8 @@
 import 'package:accenture_hackaton_2025/di/injection.dart';
 import 'package:accenture_hackaton_2025/presentation/common/text.dart';
 import 'package:accenture_hackaton_2025/presentation/features/appointment/appointment_cell.dart';
-import 'package:accenture_hackaton_2025/presentation/features/chat/chat_page.dart';
 import 'package:accenture_hackaton_2025/presentation/features/chat/cubit/chat_cubit.dart';
-import 'package:accenture_hackaton_2025/presentation/features/onboarding/onbarding_page.dart';
 import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_chat_page.dart';
-import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_loading_page.dart';
-import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_results_page.dart';
-import 'package:accenture_hackaton_2025/presentation/features/symptom/new_symptom_page.dart';
 import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -55,7 +50,7 @@ class HomePage extends StatelessWidget {
                             itemBuilder: (context, index) {
                               return AppointmentCell(
                                   appointment:
-                                      state.scheduledAppointments[index]!);
+                                      state.scheduledAppointments[index]);
                             },
                           ),
                       ],

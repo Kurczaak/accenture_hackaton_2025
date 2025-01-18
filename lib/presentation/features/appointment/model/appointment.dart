@@ -11,6 +11,20 @@ class Appointment {
     required this.doctor,
   });
 
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+
+    return other is Appointment &&
+        other.appointmentName == appointmentName &&
+        other.office == office &&
+        other.doctor == doctor;
+  }
+
+  @override
+  int get hashCode =>
+      appointmentName.hashCode ^ office.hashCode ^ doctor.hashCode;
+
   factory Appointment.fromJson(Map<String, dynamic> json) {
     return Appointment(
       appointmentName: json['appointmentName'],

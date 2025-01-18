@@ -27,7 +27,6 @@ class AppointmentCell extends StatelessWidget {
 
 class _PageBody extends StatelessWidget {
   _PageBody({
-    super.key,
     required this.appointment,
   });
 
@@ -71,26 +70,28 @@ class _PageBody extends StatelessWidget {
               text: 'Doctor: ${appointment.doctor}',
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
-                // Handle change date action
-                if (context
-                    .read<ChatCubit>()
-                    .state
-                    .scheduledAppointments
-                    .contains(appointment)) {
-                  context.read<ChatCubit>().unscheduleAppointment(appointment);
-                } else {
-                  context.read<ChatCubit>().scheduleAppointment(appointment);
-                }
+            BlocBuilder<ChatCubit, ChatState>(
+              builder: (context, state) {
+                return ElevatedButton(
+                  onPressed: () {
+                    // Handle change date action
+                    if (state.scheduledAppointments.contains(appointment)) {
+                      context
+                          .read<ChatCubit>()
+                          .unscheduleAppointment(appointment);
+                    } else {
+                      context
+                          .read<ChatCubit>()
+                          .scheduleAppointment(appointment);
+                    }
+                  },
+                  child: Text(
+                    state.scheduledAppointments.contains(appointment)
+                        ? 'Unshedule Appointment'
+                        : 'Schedule Appointment',
+                  ),
+                );
               },
-              child: Text(context
-                      .read<ChatCubit>()
-                      .state
-                      .scheduledAppointments
-                      .contains(appointment)
-                  ? 'Unshedule Appointment'
-                  : 'Schedule Appointment'),
             ),
           ],
         ),
