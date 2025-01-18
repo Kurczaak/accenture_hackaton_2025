@@ -1,5 +1,6 @@
 import 'package:accenture_hackaton_2025/presentation/common/text.dart';
 import 'package:accenture_hackaton_2025/presentation/features/onboarding/onbarding_page.dart';
+import 'package:accenture_hackaton_2025/presentation/features/symptom/new_symptom_page.dart';
 import 'package:accenture_hackaton_2025/router/router.gr.dart';
 import 'package:flutter/material.dart';
 import 'package:auto_route/auto_route.dart';
@@ -13,18 +14,6 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Home'),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'Settings',
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -44,8 +33,13 @@ class HomePage extends StatelessWidget {
                 child: const MyText(text: 'Onboarding'),
               ),
               TextButton(
-                onPressed: () {},
-                child: const MyText(text: 'Splash Screen'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => NewSymptomPage()),
+                  );
+                },
+                child: const MyText(text: 'New Symptom'),
               ),
             ],
           ),
