@@ -8,6 +8,7 @@ abstract class ChatState with _$ChatState {
     @Default(false) bool isLoading,
     @Default(false) bool isSuccess,
     @Default(false) bool isFailure,
+    @Default(false) bool isRecording,
     @Default('') String userInput,
     String? errorMessage,
   }) = _ChatState;
