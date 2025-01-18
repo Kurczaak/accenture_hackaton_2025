@@ -102,134 +102,156 @@ class _PageBodyState extends State<_PageBody> {
       }
     }, builder: (context, state) {
       if (!state.isVoiceMode) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
-                child: ListView.builder(
-                  controller: _scollController,
-                  shrinkWrap: true,
-                  itemCount: state.messages.length +
-                      (state.lastMessage != null ? 1 : 0),
-                  itemBuilder: (context, index) {
-                    if (state.lastMessage != null &&
-                        index == state.messages.length) {
-                      return _chatBubble(message: state.lastMessage!);
-                    }
-                    final message = state.messages[index];
-                    return _chatBubble(message: message);
-                  },
+        return DecoratedBox(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  Image.asset(
+                    'assets/images/app/logo_color.png',
+                    width: 200,
+                    fit: BoxFit.contain,
+                  ),
+                  Image.asset(
+                    'assets/images/app/doctor.png',
+                    width: 150,
+                    fit: BoxFit.contain,
+                  ),
+                ],
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
+                  child: ListView.builder(
+                    controller: _scollController,
+                    shrinkWrap: true,
+                    itemCount: state.messages.length +
+                        (state.lastMessage != null ? 1 : 0),
+                    itemBuilder: (context, index) {
+                      if (state.lastMessage != null &&
+                          index == state.messages.length) {
+                        return _chatBubble(message: state.lastMessage!);
+                      }
+                      final message = state.messages[index];
+                      return _chatBubble(message: message);
+                    },
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 8),
-            DecoratedBox(
-              decoration: const BoxDecoration(
-                color: AppTheme.primaryColorDark,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Column(
-                  children: [
-                    TextField(
-                      controller: _textController,
-                      onChanged: (value) {
-                        context.read<ChatCubit>().writeMessage(value);
-                      },
-                      minLines: state.messages.length > 1 ? 2 : 10,
-                      maxLines: 10,
-                      decoration: const InputDecoration(
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(12),
+              const SizedBox(height: 8),
+              DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: AppTheme.primaryColorDark,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(12.0),
+                  child: Column(
+                    children: [
+                      TextField(
+                        controller: _textController,
+                        onChanged: (value) {
+                          context.read<ChatCubit>().writeMessage(value);
+                        },
+                        minLines: state.messages.length > 1 ? 2 : 10,
+                        maxLines: 10,
+                        decoration: const InputDecoration(
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(
+                              Radius.circular(12),
+                            ),
                           ),
+                          hintText:
+                              'Enter your symptom details here or tap the mic button to record a voice message',
                         ),
-                        hintText:
-                            'Enter your symptom details here or tap the mic button to record a voice message',
                       ),
-                    ),
-                    if (state.images.isNotEmpty) ...[
-                      const SizedBox(height: 12),
-                      const SizedBox(
-                        height: 100,
-                        child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: _ImagesPreviewRow()),
-                      ),
-                    ],
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.attach_file),
-                          style: widget._buttonStyle,
-                          onPressed: () {
-                            context.read<ChatCubit>().addFile();
-                          },
-                        ),
-                        const SizedBox(width: 12),
-                        IconButton(
-                          icon: const Icon(Icons.camera_alt),
-                          style: widget._buttonStyle,
-                          onPressed: () {
-                            context.read<ChatCubit>().uploadPhoto();
-                          },
-                        ),
-                        const SizedBox(width: 12),
-                        BlocBuilder<ChatCubit, ChatState>(
-                          builder: (context, state) {
-                            return IconButton(
-                              icon: Icon(
-                                Icons.mic,
-                                color: state.isSTT
-                                    ? AppTheme.errorColor
-                                    : AppTheme.backgroundColor,
-                              ),
-                              style: widget._buttonStyle,
-                              onPressed: () {
-                                context.read<ChatCubit>().toggleSpeechToText();
-                              },
-                            );
-                          },
-                        ),
-                        if (state.symptoms.length > 0) ...[
-                          SizedBox(width: 12),
-                          IconButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => OnboardingResultsPage(
-                                    items: state.symptoms,
-                                  ),
-                                ),
-                              );
-                            },
-                            style: widget._buttonStyle,
-                            icon: const Icon(Icons.arrow_forward),
-                          ),
-                        ],
-                        const Spacer(),
-                        IconButton(
-                          icon: const Icon(Icons.send),
-                          style: widget._buttonStyle,
-                          onPressed: () {
-                            if (state.userInput.isNotEmpty) {
-                              context.read<ChatCubit>().sendMessage(
-                                  isOnboarding: widget.isOnboarding);
-                            }
-                          },
+                      if (state.images.isNotEmpty) ...[
+                        const SizedBox(height: 12),
+                        const SizedBox(
+                          height: 100,
+                          child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: _ImagesPreviewRow()),
                         ),
                       ],
-                    )
-                  ],
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.attach_file),
+                            style: widget._buttonStyle,
+                            onPressed: () {
+                              context.read<ChatCubit>().addFile();
+                            },
+                          ),
+                          const SizedBox(width: 12),
+                          IconButton(
+                            icon: const Icon(Icons.camera_alt),
+                            style: widget._buttonStyle,
+                            onPressed: () {
+                              context.read<ChatCubit>().uploadPhoto();
+                            },
+                          ),
+                          const SizedBox(width: 12),
+                          BlocBuilder<ChatCubit, ChatState>(
+                            builder: (context, state) {
+                              return IconButton(
+                                icon: Icon(
+                                  Icons.mic,
+                                  color: state.isSTT
+                                      ? AppTheme.errorColor
+                                      : AppTheme.backgroundColor,
+                                ),
+                                style: widget._buttonStyle,
+                                onPressed: () {
+                                  context
+                                      .read<ChatCubit>()
+                                      .toggleSpeechToText();
+                                },
+                              );
+                            },
+                          ),
+                          if (state.symptoms.length > 0) ...[
+                            SizedBox(width: 12),
+                            IconButton(
+                              onPressed: () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => OnboardingResultsPage(
+                                      items: state.symptoms,
+                                    ),
+                                  ),
+                                );
+                              },
+                              style: widget._buttonStyle,
+                              icon: const Icon(Icons.arrow_forward),
+                            ),
+                          ],
+                          const Spacer(),
+                          IconButton(
+                            icon: const Icon(Icons.send),
+                            style: widget._buttonStyle,
+                            onPressed: () {
+                              if (state.userInput.isNotEmpty) {
+                                context.read<ChatCubit>().sendMessage(
+                                    isOnboarding: widget.isOnboarding);
+                              }
+                            },
+                          ),
+                        ],
+                      )
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         );
       } else {
         return Column(
@@ -300,10 +322,10 @@ class _PageBodyState extends State<_PageBody> {
             borderRadius: BorderRadius.circular(12),
             color: (message.isUser)
                 ? AppTheme.primaryColorLight
-                : AppTheme.textHintColor,
+                : AppTheme.primaryColor,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -311,8 +333,8 @@ class _PageBodyState extends State<_PageBody> {
                   message.message,
                   style: TextStyle(
                       color: (message.isUser)
-                          ? AppTheme.textColorLight
-                          : AppTheme.textColorDark),
+                          ? AppTheme.primaryColor
+                          : AppTheme.textColorLight),
                 ),
                 if (message.images.isNotEmpty)
                   SizedBox(
