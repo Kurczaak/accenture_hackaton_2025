@@ -1,13 +1,32 @@
-import 'package:accenture_hackaton_2025/config/app_theme.dart';
+import 'package:accenture_hackaton_2025/di/injection.dart';
 import 'package:accenture_hackaton_2025/presentation/common/button.dart';
 import 'package:accenture_hackaton_2025/presentation/common/text.dart';
+import 'package:accenture_hackaton_2025/presentation/features/chat/cubit/chat_cubit.dart';
 import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_loading_page.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class OnboardingResultsPage extends StatelessWidget {
   final List<String> items;
 
   const OnboardingResultsPage({super.key, required this.items});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => getIt<ChatCubit>(),
+      child: _Body(items: items),
+    );
+  }
+}
+
+class _Body extends StatelessWidget {
+  const _Body({
+    super.key,
+    required this.items,
+  });
+
+  final List<String> items;
 
   @override
   Widget build(BuildContext context) {
@@ -20,16 +39,18 @@ class OnboardingResultsPage extends StatelessWidget {
         child: MyButton(
           label: "Continue",
           onPressed: () {
+            context.read<ChatCubit>().suggestAppointments();
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => OnboardingLoadingPage()),
+              MaterialPageRoute(
+                  builder: (context) => const OnboardingLoadingPage()),
             );
           },
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: Padding(
-        padding: EdgeInsets.symmetric(horizontal: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         child: Column(
           children: [
             const Align(

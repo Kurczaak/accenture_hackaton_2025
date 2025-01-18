@@ -38,7 +38,11 @@ class HomePage extends StatelessWidget {
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => NewSymptomPage()),
+                    MaterialPageRoute(
+                      builder: (context) => NewSymptomPage(
+                        isOnboarding: true,
+                      ),
+                    ),
                   );
                 },
                 child: const MyText(text: 'New Symptom'),

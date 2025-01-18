@@ -15,7 +15,7 @@ class ChatPage extends StatelessWidget {
           title: const Text('Chat'),
         ),
         body: BlocProvider<ChatCubit>(
-          create: (context) => getIt<ChatCubit>(),
+          create: (context) => getIt<ChatCubit>()..init(),
           child: const _PageBody(),
         ));
   }
@@ -64,7 +64,9 @@ class _PageBody extends StatelessWidget {
                     width: 100,
                     child: ElevatedButton(
                       onPressed: () {
-                        context.read<ChatCubit>().sendMessage();
+                        context
+                            .read<ChatCubit>()
+                            .sendMessage(isOnboarding: false);
                       },
                       child: const Text('Send'),
                     ),
