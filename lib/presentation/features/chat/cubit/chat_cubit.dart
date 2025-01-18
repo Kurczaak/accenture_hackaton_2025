@@ -401,6 +401,25 @@ class ChatCubit extends Cubit<ChatState> {
   void clearState() {
     emit(const ChatState(messages: []));
   }
+
+  void scheduleAppointment(Appointment appointment) {
+    emit(
+      state.copyWith(
+        scheduledAppointments: [...state.scheduledAppointments, appointment],
+      ),
+    );
+  }
+
+  void unscheduleAppointment(Appointment appointment) {
+    emit(
+      state.copyWith(
+        scheduledAppointments: [
+          for (final apt in state.scheduledAppointments)
+            if (apt != appointment) apt
+        ],
+      ),
+    );
+  }
 }
 
 extension IterableExt<T> on Iterable<T> {
