@@ -12,6 +12,7 @@ class MyButton extends StatefulWidget {
   });
 
   @override
+  // ignore: no_logic_in_create_state
   State<MyButton> createState() => _MyButtonState(
         label: label,
         onPressed: onPressed,
@@ -36,7 +37,7 @@ class _MyButtonState extends State<MyButton> {
         child: DecoratedBox(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               colors: [
                 AppTheme.primaryColor,
                 AppTheme.primaryColorLight,
@@ -55,7 +56,7 @@ class _MyButtonState extends State<MyButton> {
             alignment: Alignment.center,
             child: Text(
               label,
-              style: TextStyle(
+              style: const TextStyle(
                 color: AppTheme.textColorLight,
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
