@@ -1,16 +1,20 @@
 import 'package:accenture_hackaton_2025/config/app_theme.dart';
 import 'package:accenture_hackaton_2025/presentation/common/button.dart';
+import 'package:accenture_hackaton_2025/presentation/common/text.dart';
 import 'package:accenture_hackaton_2025/presentation/features/home/home_page.dart';
+import 'package:accenture_hackaton_2025/presentation/features/onboarding/onboarding_step_page.dart';
+import 'package:auto_route/auto_route.dart';
 import 'package:flutter/material.dart';
 
-class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+@RoutePage()
+class OnboardingPage extends StatefulWidget {
+  const OnboardingPage({super.key});
 
   @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
+  State<OnboardingPage> createState() => _OnboardingPageState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen> {
+class _OnboardingPageState extends State<OnboardingPage> {
   final List<String> points = [
     'Your personal fridge assistant',
     'Helping you keep track of your groceries',
@@ -28,17 +32,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
+              MaterialPageRoute(
+                  builder: (context) => const OnboardingStepPage(step: 1)),
             );
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 50, 24, 0),
+      body: const Padding(
+        padding: EdgeInsets.fromLTRB(24, 50, 24, 0),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
+            children: [
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -68,35 +73,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Your personal fridge assistant',
-                      style: TextStyle(
-                        color: AppTheme.textColorDark,
-                        fontSize: 16,
-                      ),
-                    ),
+                    child: MyText(text: 'Your personal fridge assistant'),
                   ),
                   SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                      'Helping you keep track of your groceries',
-                      style: TextStyle(
-                        color: AppTheme.textColorDark,
-                        fontSize: 16,
-                      ),
-                    ),
+                    child: MyText(
+                        text: 'Helping you keep track of your groceries'),
                   ),
                   SizedBox(height: 8),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                      'And reducing food waste',
-                      style: TextStyle(
-                        color: AppTheme.textColorDark,
-                        fontSize: 16,
-                      ),
-                    ),
+                    child: MyText(text: 'And reducing food waste.'),
                   ),
                 ]),
               )
