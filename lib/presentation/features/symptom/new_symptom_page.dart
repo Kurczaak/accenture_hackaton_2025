@@ -23,7 +23,7 @@ class _NewSymptomPageState extends State<NewSymptomPage> {
       ),
       backgroundColor: AppTheme.backgroundColor,
       body: BlocProvider<ChatCubit>(
-        create: (context) => getIt<ChatCubit>(),
+        create: (context) => getIt<ChatCubit>()..init(),
         child: _PageBody(
           buttonStyle: _buttonStyle,
           stopButtonStyle: _stopButtonStyle,
@@ -76,185 +76,205 @@ class _PageBody extends StatefulWidget {
 class _PageBodyState extends State<_PageBody> {
   final _textController = TextEditingController();
 
+  final _scollController = ScrollController();
+
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<ChatCubit, ChatState>(
-        listener: (context, state) => {
-              if (state.userInput.isEmpty)
-                {
-                  _textController.clear(),
-                }
-            },
-        builder: (context, state) {
-          if (!state.isVoiceMode) {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
-                      child: Column(
-                        children: [
-                          ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: state.messages.length +
-                                (state.lastMessage != null ? 1 : 0),
-                            itemBuilder: (context, index) {
-                              if (state.lastMessage != null &&
-                                  index == state.messages.length) {
-                                return _chatBubble(message: state.lastMessage!);
-                              }
-                              final message = state.messages[index];
-                              return _chatBubble(message: message);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+    return BlocConsumer<ChatCubit, ChatState>(listenWhen: (previous, current) {
+      if (previous.lastMessage != null && current.lastMessage == null) {
+        _scollController.animateTo(
+          _scollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.linear,
+        );
+      }
+      return true;
+    }, listener: (context, state) {
+      if (state.sttText != null) {
+        _textController.text = state.sttText!;
+      }
+      if (state.userInput.isEmpty && state.sttText == null) {
+        _textController.clear();
+      }
+      if (state.lastMessage != null) {
+        _scollController.animateTo(
+          _scollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 100),
+          curve: Curves.linear,
+        );
+      }
+    }, builder: (context, state) {
+      if (!state.isVoiceMode) {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
+                child: ListView.builder(
+                  controller: _scollController,
+                  shrinkWrap: true,
+                  itemCount: state.messages.length +
+                      (state.lastMessage != null ? 1 : 0),
+                  itemBuilder: (context, index) {
+                    if (state.lastMessage != null &&
+                        index == state.messages.length) {
+                      return _chatBubble(message: state.lastMessage!);
+                    }
+                    final message = state.messages[index];
+                    return _chatBubble(message: message);
+                  },
                 ),
-                const SizedBox(height: 8),
-                DecoratedBox(
-                  decoration: const BoxDecoration(
-                    color: AppTheme.primaryColorDark,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(12.0),
-                    child: Column(
-                      children: [
-                        TextField(
-                          controller: _textController,
-                          onChanged: (value) {
-                            context.read<ChatCubit>().writeMessage(value);
-                          },
-                          onSubmitted: (value) {
-                            context.read<ChatCubit>().sendMessage();
-                          },
-                          minLines: state.messages.length > 1 ? 2 : 10,
-                          maxLines: 10,
-                          decoration: const InputDecoration(
-                            filled: true,
-                            fillColor: Colors.white,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(12),
-                              ),
-                            ),
-                            hintText:
-                                'Enter your symptom details here or tap the mic button to record a voice message',
+              ),
+            ),
+            const SizedBox(height: 8),
+            DecoratedBox(
+              decoration: const BoxDecoration(
+                color: AppTheme.primaryColorDark,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _textController,
+                      onChanged: (value) {
+                        context.read<ChatCubit>().writeMessage(value);
+                      },
+                      onSubmitted: (value) {
+                        context.read<ChatCubit>().sendMessage();
+                      },
+                      minLines: state.messages.length > 1 ? 2 : 10,
+                      maxLines: 10,
+                      decoration: const InputDecoration(
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
                           ),
                         ),
-                        if (state.images.isNotEmpty) ...[
-                          const SizedBox(height: 12),
-                          const SizedBox(
-                            height: 100,
-                            child: Align(
-                                alignment: Alignment.centerLeft,
-                                child: _ImagesPreviewRow()),
-                          ),
-                        ],
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.attach_file),
-                              style: widget._buttonStyle,
-                              onPressed: () {
-                                context.read<ChatCubit>().addFile();
-                              },
-                            ),
-                            const SizedBox(width: 12),
-                            IconButton(
-                              icon: const Icon(Icons.camera_alt),
-                              style: widget._buttonStyle,
-                              onPressed: () {
-                                context.read<ChatCubit>().uploadPhoto();
-                              },
-                            ),
-                            const SizedBox(width: 12),
-                            IconButton(
-                              icon: const Icon(Icons.mic),
-                              style: widget._buttonStyle,
-                              onPressed: () {
-                                context.read<ChatCubit>().toggleVoiceMode(true);
-                              },
-                            ),
-                            const Spacer(),
-                            IconButton(
-                              icon: const Icon(Icons.send),
-                              style: widget._buttonStyle,
-                              onPressed: () {
-                                if (state.userInput.isNotEmpty) {
-                                  context.read<ChatCubit>().sendMessage();
-                                }
-                              },
-                            ),
-                          ],
-                        )
-                      ],
+                        hintText:
+                            'Enter your symptom details here or tap the mic button to record a voice message',
+                      ),
                     ),
-                  ),
-                ),
-              ],
-            );
-          } else {
-            return Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Flexible(
-                  child: Image.asset(
-                    'assets/images/app/doctor.png',
-                    width: double.infinity,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-                DecoratedBox(
-                  decoration: const BoxDecoration(
-                    color: AppTheme.primaryColorDark,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 12.0, vertical: 32),
-                    child: Row(
+                    if (state.images.isNotEmpty) ...[
+                      const SizedBox(height: 12),
+                      const SizedBox(
+                        height: 100,
+                        child: Align(
+                            alignment: Alignment.centerLeft,
+                            child: _ImagesPreviewRow()),
+                      ),
+                    ],
+                    const SizedBox(height: 12),
+                    Row(
                       children: [
                         IconButton(
                           icon: const Icon(Icons.attach_file),
                           style: widget._buttonStyle,
                           onPressed: () {
-                            // Handle attachment action
+                            context.read<ChatCubit>().addFile();
                           },
                         ),
-                        const Spacer(),
-                        SizedBox(
-                          height: 50,
-                          width: 50,
-                          child: IconButton(
-                            icon: const Icon(Icons.mic_rounded),
-                            style: widget._micButtonStyle,
-                            onPressed: () {
-                              if (state.userInput.isNotEmpty) {
-                                context.read<ChatCubit>().sendMessage();
-                              }
-                            },
-                          ),
+                        const SizedBox(width: 12),
+                        IconButton(
+                          icon: const Icon(Icons.camera_alt),
+                          style: widget._buttonStyle,
+                          onPressed: () {
+                            context.read<ChatCubit>().uploadPhoto();
+                          },
+                        ),
+                        const SizedBox(width: 12),
+                        BlocBuilder<ChatCubit, ChatState>(
+                          builder: (context, state) {
+                            return IconButton(
+                              icon: Icon(
+                                Icons.mic,
+                                color: state.isSTT
+                                    ? AppTheme.errorColor
+                                    : AppTheme.backgroundColor,
+                              ),
+                              style: widget._buttonStyle,
+                              onPressed: () {
+                                context.read<ChatCubit>().toggleSpeechToText();
+                              },
+                            );
+                          },
                         ),
                         const Spacer(),
                         IconButton(
-                          icon: const Icon(Icons.keyboard),
+                          icon: const Icon(Icons.send),
                           style: widget._buttonStyle,
                           onPressed: () {
-                            context.read<ChatCubit>().toggleVoiceMode(false);
+                            if (state.userInput.isNotEmpty) {
+                              context.read<ChatCubit>().sendMessage();
+                            }
                           },
                         ),
                       ],
-                    ),
-                  ),
+                    )
+                  ],
                 ),
-              ],
-            );
-          }
-        });
+              ),
+            ),
+          ],
+        );
+      } else {
+        return Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Flexible(
+              child: Image.asset(
+                'assets/images/app/doctor.png',
+                width: double.infinity,
+                fit: BoxFit.contain,
+              ),
+            ),
+            DecoratedBox(
+              decoration: const BoxDecoration(
+                color: AppTheme.primaryColorDark,
+              ),
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12.0, vertical: 32),
+                child: Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.attach_file),
+                      style: widget._buttonStyle,
+                      onPressed: () {
+                        // Handle attachment action
+                      },
+                    ),
+                    const Spacer(),
+                    SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: IconButton(
+                        icon: const Icon(Icons.mic_rounded),
+                        style: widget._micButtonStyle,
+                        onPressed: () {
+                          context.read<ChatCubit>().toggleSpeechToText();
+                        },
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      icon: const Icon(Icons.keyboard),
+                      style: widget._buttonStyle,
+                      onPressed: () {
+                        context.read<ChatCubit>().toggleVoiceMode(false);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        );
+      }
+    });
   }
 
   _chatBubble({

@@ -12,6 +12,8 @@ abstract class ChatState with _$ChatState {
     @Default(false) bool isVoiceMode,
     @Default('') String userInput,
     @Default([]) List<File> images,
+    @Default(false) bool isSTT,
+    String? sttText,
     String? errorMessage,
   }) = _ChatState;
 }
