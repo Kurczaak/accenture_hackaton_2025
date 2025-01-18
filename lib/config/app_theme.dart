@@ -3,8 +3,8 @@ import 'dart:ui';
 class AppTheme {
   AppTheme._();
 
-  static const Color primaryColor = Color(0xFF0D47A1);
-  static const Color primaryColorLight = Color(0xFF5472D3);
+  static const Color primaryColor = Color.fromARGB(255, 74, 55, 170);
+  static const Color primaryColorLight = Color(0xFFF0E4FE);
   static const Color primaryColorDark = Color(0xFF002171);
   static const Color secondaryColor = Color(0xFF00BFA5);
   static const Color secondaryColorLight = Color(0xFF5DF2D6);

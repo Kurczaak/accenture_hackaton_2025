@@ -105,6 +105,11 @@ class _PageBodyState extends State<_PageBody> {
         return Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            Image.asset(
+              'assets/images/app/doctor.png',
+              width: 150,
+              fit: BoxFit.contain,
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(0, 12, 0, 0),
@@ -300,10 +305,10 @@ class _PageBodyState extends State<_PageBody> {
             borderRadius: BorderRadius.circular(12),
             color: (message.isUser)
                 ? AppTheme.primaryColorLight
-                : AppTheme.textHintColor,
+                : AppTheme.primaryColor,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -311,8 +316,8 @@ class _PageBodyState extends State<_PageBody> {
                   message.message,
                   style: TextStyle(
                       color: (message.isUser)
-                          ? AppTheme.textColorLight
-                          : AppTheme.textColorDark),
+                          ? AppTheme.primaryColor
+                          : AppTheme.textColorLight),
                 ),
                 if (message.images.isNotEmpty)
                   SizedBox(

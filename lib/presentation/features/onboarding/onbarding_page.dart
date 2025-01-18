@@ -35,11 +35,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
             colors: [
-              AppTheme.primaryColor,
+              AppTheme.backgroundColor,
               AppTheme.primaryColorLight,
+              AppTheme.primaryColor,
             ],
           ),
         ),
